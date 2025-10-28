@@ -1,0 +1,16 @@
+{
+  "mode": "simulate",
+  "objective": "max_power",
+  "pricing": {"power_USD_MWh": 55, "heat_USD_MWh": 25, "fuel_USD_MMBtu": 8},
+  "bounds": {
+    "GT1.load_pct": [50, 100],
+    "HRSG.hp_sh_out_T_C": [520, 600],
+    "COND.vacuum_kPa_abs": [6, 12]
+  },
+  "constraints": {
+    "HRSG.stack_T_min_C": 90,
+    "HRSG.pinch_HP_min_K": 10,
+    "DHN.supply_min_C": 110
+  },
+  "toggles": {"hrh_bypass_on": false}
+}

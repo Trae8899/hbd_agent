@@ -1,0 +1,18 @@
+{
+  "mode": "optimize",
+  "objective": "max_revenue",
+  "pricing": {"power_USD_MWh": 62, "heat_USD_MWh": 30, "fuel_USD_MMBtu": 9},
+  "bounds": {
+    "GT1.load_pct": [60, 100],
+    "HRSG.hp_sh_out_T_C": [520, 590],
+    "COND.vacuum_kPa_abs": [6, 11],
+    "DHN.SOC": [0.3, 0.85]
+  },
+  "constraints": {
+    "HRSG.stack_T_min_C": 95,
+    "HRSG.pinch_HP_min_K": 10,
+    "METAL.max_T_C": 600,
+    "DHN.heat_demand_MW": 120
+  },
+  "toggles": {"hrh_bypass_on": false}
+}
