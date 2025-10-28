@@ -203,6 +203,7 @@ class UnitBase(Protocol):
 - 모든 Unit 플러그인은 **PyTest 기반 예제 테스트**를 최소 2개 포함해야 합니다.
 - 결과에는 `plant_hash`(입력 그래프 SHA-1)와 `solver_commit`을 기록하여 재현성을 확보합니다.
 - 산출물: Excel(요약/스트림/로그), SVG(블록 다이어그램), JSON(전체 state).
+- React + Vite 기반 그래프 디자이너는 `ui/hbd_designer/`에 위치하며, `scripts/run_dev.py`가 FastAPI 백엔드와 UI 개발 서버를 동시에 실행합니다 (Poetry + npm 환경 전제).
 - UI는 `/schemas` 엔드포인트를 활용해 폼을 자동 구성하며, KPI 카드에 `Heat MWth`, `DHN SOC`, `Supply/Return °C`, `Revenue/h`를 표시합니다.
 - 증기 터빈 등 장치 팔레트 메타데이터는 `ui/palette/unit_palette.json`에서 관리하며, 백엔드는 `/palette/units`로 이를 제공해야 합니다.
 - Canvas UI는 매질별 색상(가스=빨강, 증기/물=파랑, 난방수=주황, 연료가스=진회색)을 사용하고 Auto-Run으로 0.5초 후 재계산합니다.
