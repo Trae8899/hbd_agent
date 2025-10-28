@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "3-pressure CCPP with HP reheat and IP/LP split"
+  },
+  "ambient": {
+    "T_C": 30.0,
+    "RH_pct": 60,
+    "P_kPa_abs": 101.3
+  },
+  "units": [
+    {
+      "id": "GT1",
+      "type": "GasTurbine",
+      "params": {
+        "iso_power_MW": 401.8,
+        "ISO_heat_rate_kJ_per_kWh": 8470,
+        "fuel_LHV_kJ_per_kg": 49000
+      }
+    },
+    {
+      "id": "HRSG",
+      "type": "HRSG3P",
+      "params": {
+        "pinch_HP_K": 10,
+        "approach_HP_K": 5,
+        "pinch_IP_K": 12,
+        "pinch_LP_K": 15,
+        "reheat_target_C": 560
+      }
+    },
+    {
+      "id": "ST_HP",
+      "type": "SteamTurbineHP",
+      "params": {
+        "eta_isentropic": 0.9,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.99
+      }
+    },
+    {
+      "id": "ST_IP",
+      "type": "SteamTurbineIP",
+      "params": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.99
+      }
+    },
+    {
+      "id": "ST_LP",
+      "type": "SteamTurbineLP",
+      "params": {
+        "eta_isentropic": 0.86,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.99
+      }
+    },
+    {
+      "id": "COND",
+      "type": "Condenser",
+      "params": {
+        "cw_in_C": 20,
+        "cw_out_max_C": 28,
+        "vacuum_kPa_abs": 8
+      }
+    }
+  ],
+  "streams": [
+    {"from": "GT1.exhaust", "to": "HRSG.gas_in"},
+    {"from": "HRSG.hp_sh_out", "to": "ST_HP.inlet"},
+    {"from": "ST_HP.outlet", "to": "HRSG.reheat_in"},
+    {"from": "HRSG.reheat_out", "to": "ST_IP.inlet"},
+    {"from": "ST_IP.outlet", "to": "ST_LP.inlet"},
+    {"from": "ST_LP.outlet", "to": "COND.steam_in"},
+    {"from": "COND.condensate_out", "to": "HRSG.feedwater_in"}
+  ]
+}

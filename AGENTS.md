@@ -21,15 +21,49 @@
   "meta": {"version": "1.0"},
   "ambient": {"T_C": 30.0, "RH_pct": 60, "P_kPa_abs": 101.3},
   "units": [
-    {"id": "GT1", "type": "GasTurbine", "params": {"iso_power_MW": 401.8, "ISO_heat_rate_kJ_per_kWh": 8470, "fuel_LHV_kJ_per_kg": 49000}},
-    {"id": "HRSG", "type": "HRSG3P", "params": {"pinch_HP_K": 10, "approach_HP_K": 5}},
-    {"id": "STG", "type": "SteamTurbineIPLP", "params": {"eta_is_IP": 0.88, "eta_is_LP": 0.88}},
-    {"id": "COND", "type": "Condenser", "params": {"cw_in_C": 20, "cw_out_max_C": 28, "vacuum_kPa_abs": 8}}
+    {
+      "id": "GT1",
+      "type": "GasTurbine",
+      "params": {
+        "iso_power_MW": 401.8,
+        "ISO_heat_rate_kJ_per_kWh": 8470,
+        "fuel_LHV_kJ_per_kg": 49000
+      }
+    },
+    {
+      "id": "HRSG",
+      "type": "HRSG3P",
+      "params": {
+        "pinch_HP_K": 10,
+        "approach_HP_K": 5,
+        "pinch_IP_K": 12,
+        "pinch_LP_K": 15
+      }
+    },
+    {
+      "id": "STG",
+      "type": "SteamTurbineIPLP",
+      "params": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985
+      }
+    },
+    {
+      "id": "COND",
+      "type": "Condenser",
+      "params": {
+        "cw_in_C": 20,
+        "cw_out_max_C": 28,
+        "vacuum_kPa_abs": 8
+      }
+    }
   ],
   "streams": [
     {"from": "GT1.exhaust", "to": "HRSG.gas_in"},
     {"from": "HRSG.hp_sh_out", "to": "STG.hp_in"},
-    {"from": "STG.lp_exhaust", "to": "COND.steam_in"}
+    {"from": "STG.lp_exhaust", "to": "COND.steam_in"},
+    {"from": "COND.condensate_out", "to": "HRSG.feedwater_in"}
   ]
 }
 ```
@@ -58,6 +92,8 @@
   ]
 }
 ```
+
+재열 흐름 토폴로지 예시는 `examples/graphs/ccpp_reheat.json`에서 HP → 재열 → IP → LP 증기 경로를 보여줍니다.
 
 ### 2.2 RunCase 정의
 
@@ -168,6 +204,7 @@ class UnitBase(Protocol):
 - 결과에는 `plant_hash`(입력 그래프 SHA-1)와 `solver_commit`을 기록하여 재현성을 확보합니다.
 - 산출물: Excel(요약/스트림/로그), SVG(블록 다이어그램), JSON(전체 state).
 - UI는 `/schemas` 엔드포인트를 활용해 폼을 자동 구성하며, KPI 카드에 `Heat MWth`, `DHN SOC`, `Supply/Return °C`, `Revenue/h`를 표시합니다.
+- 증기 터빈 등 장치 팔레트 메타데이터는 `ui/palette/unit_palette.json`에서 관리하며, 백엔드는 `/palette/units`로 이를 제공해야 합니다.
 - Canvas UI는 매질별 색상(가스=빨강, 증기/물=파랑, 난방수=주황, 연료가스=진회색)을 사용하고 Auto-Run으로 0.5초 후 재계산합니다.
 
 ## 8. 보안 및 금지 조항

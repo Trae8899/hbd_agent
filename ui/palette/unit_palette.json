@@ -1,0 +1,77 @@
+{
+  "$schema": "https://hbd.energy/schemas/unit_palette.schema.json",
+  "units": [
+    {
+      "type": "SteamTurbineHP",
+      "label": "Steam Turbine - HP",
+      "icon": "steam_turbine_hp.svg",
+      "category": "Steam Turbine",
+      "tags": ["steam", "turbine", "expander"],
+      "ports": {
+        "inlet": {"medium": "steam", "direction": "in"},
+        "outlet": {"medium": "steam", "direction": "out"}
+      },
+      "defaults": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985,
+        "min_flow_kg_s": null,
+        "max_flow_kg_s": null
+      }
+    },
+    {
+      "type": "SteamTurbineIP",
+      "label": "Steam Turbine - IP",
+      "icon": "steam_turbine_ip.svg",
+      "category": "Steam Turbine",
+      "tags": ["steam", "turbine", "expander"],
+      "ports": {
+        "inlet": {"medium": "steam", "direction": "in"},
+        "outlet": {"medium": "steam", "direction": "out"}
+      },
+      "defaults": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985,
+        "min_flow_kg_s": null,
+        "max_flow_kg_s": null
+      }
+    },
+    {
+      "type": "SteamTurbineLP",
+      "label": "Steam Turbine - LP",
+      "icon": "steam_turbine_lp.svg",
+      "category": "Steam Turbine",
+      "tags": ["steam", "turbine", "expander"],
+      "ports": {
+        "inlet": {"medium": "steam", "direction": "in"},
+        "outlet": {"medium": "steam", "direction": "out"}
+      },
+      "defaults": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985,
+        "min_flow_kg_s": null,
+        "max_flow_kg_s": null
+      }
+    },
+    {
+      "type": "SteamTurbineIPLP",
+      "label": "Steam Turbine - IP/LP",
+      "icon": "steam_turbine_iplp.svg",
+      "category": "Steam Turbine",
+      "tags": ["steam", "turbine", "expander"],
+      "ports": {
+        "inlet": {"medium": "steam", "direction": "in"},
+        "outlet": {"medium": "steam", "direction": "out"}
+      },
+      "defaults": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985,
+        "min_flow_kg_s": null,
+        "max_flow_kg_s": null
+      }
+    }
+  ]
+}
