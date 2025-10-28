@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 try:  # pragma: no cover - exercised implicitly when fastapi is available
     from fastapi import FastAPI, HTTPException
+    from fastapi.responses import JSONResponse
 except ModuleNotFoundError:  # pragma: no cover - fallback for offline test envs
     class HTTPException(Exception):
         """Lightweight HTTPException fallback mimicking FastAPI."""
@@ -30,6 +31,18 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for offline test envs
                 return func
 
             return decorator
+
+        def post(self, path: str):
+            def decorator(func):
+                self.routes[path] = func
+                return func
+
+            return decorator
+
+    class JSONResponse:  # type: ignore[misc]
+        """Fallback JSONResponse."""
+        def __init__(self, content: Any):
+            self.content = content
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SCHEMAS_DIR = BASE_DIR / "schemas"
@@ -85,6 +98,67 @@ def get_schema(schema_name: str, refresh: bool = False) -> Dict[str, Any]:
     return schema
 
 
+@app.post("/simulate")
+def simulate_plant(request: Dict[str, Any]) -> JSONResponse:
+    """Run plant simulation.
+    
+    Args:
+        request: Dictionary containing 'plant_graph' and 'run_case'
+        
+    Returns:
+        Simulation result
+    """
+    try:
+        from hbd.models import PlantGraph, RunCase
+        from hbd.engine import PlantEngine
+        
+        # Parse request
+        plant_graph = PlantGraph(**request["plant_graph"])
+        run_case = RunCase(**request["run_case"])
+        
+        # Run simulation
+        engine = PlantEngine()
+        result = engine.simulate(plant_graph, run_case)
+        
+        # Return result as JSON
+        return JSONResponse(content=result.dict())
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Simulation failed: {str(e)}")
+
+
+@app.post("/optimize")
+def optimize_plant(request: Dict[str, Any]) -> JSONResponse:
+    """Run plant optimization.
+    
+    Args:
+        request: Dictionary containing 'plant_graph' and 'run_case'
+        
+    Returns:
+        Optimization result
+    """
+    try:
+        from hbd.models import PlantGraph, RunCase
+        from hbd.engine import PlantEngine
+        
+        # Parse request
+        plant_graph = PlantGraph(**request["plant_graph"])
+        run_case = RunCase(**request["run_case"])
+        
+        # Ensure optimization mode
+        run_case.mode = "optimize"
+        
+        # Run optimization
+        engine = PlantEngine()
+        result = engine.simulate(plant_graph, run_case)
+        
+        # Return result as JSON
+        return JSONResponse(content=result.dict())
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Optimization failed: {str(e)}")
+
+
 @app.get("/palette/units")
 def get_unit_palette(refresh: bool = False) -> Dict[str, Any]:
     """Expose the UI unit palette metadata for client rendering."""
@@ -95,4 +169,4 @@ def get_unit_palette(refresh: bool = False) -> Dict[str, Any]:
     return json.loads(json.dumps(palette))
 
 
-__all__ = ["app", "list_schemas", "get_schema", "get_unit_palette", "HTTPException"]
+__all__ = ["app", "list_schemas", "get_schema", "get_unit_palette", "simulate_plant", "optimize_plant", "HTTPException"]
