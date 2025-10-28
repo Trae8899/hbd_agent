@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 import shutil
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "ui" / "hbd_designer"
@@ -19,18 +20,38 @@ class CommandError(RuntimeError):
     pass
 
 
+IS_WINDOWS = sys.platform.startswith("win")
+
+
+async def _spawn_process(
+    cmd: Sequence[str],
+    *,
+    cwd: Path | None = None,
+) -> asyncio.subprocess.Process:
+    if IS_WINDOWS:
+        command_line = subprocess.list2cmdline(list(cmd))
+        return await asyncio.create_subprocess_shell(
+            command_line,
+            cwd=str(cwd) if cwd else None,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+
+    return await asyncio.create_subprocess_exec(
+        *cmd,
+        cwd=str(cwd) if cwd else None,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+
 async def run_command(
     cmd: Sequence[str],
     *,
     cwd: Path | None = None,
     prefix: str,
 ) -> None:
-    process = await asyncio.create_subprocess_exec(
-        *cmd,
-        cwd=str(cwd) if cwd else None,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
+    process = await _spawn_process(cmd, cwd=cwd)
 
     async def stream(stream: asyncio.StreamReader, label: str) -> None:
         while True:
@@ -74,12 +95,7 @@ async def launch_process(
     prefix: str,
     stop: asyncio.Event,
 ) -> tuple[asyncio.Task[None], asyncio.Task[None]]:
-    process = await asyncio.create_subprocess_exec(
-        *cmd,
-        cwd=str(cwd) if cwd else None,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
+    process = await _spawn_process(cmd, cwd=cwd)
 
     async def pump(stream: asyncio.StreamReader, label: str) -> None:
         while True:
