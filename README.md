@@ -4,13 +4,49 @@ HBD Thermal Flex는 복합 화력(CCPP) 및 CHP/Power-to-Heat 구성을 **장치
 
 ## 1. 빠른 시작
 
-```bash
-# Python 백엔드
-pipx install poetry && poetry install
-poetry run uvicorn api.app:app --reload  # /simulate, /optimize, /schemas, /palette/units
+새 그래프 디자이너 UI는 React + Vite 기반으로 `ui/hbd_designer`에 위치하며, FastAPI 백엔드는 Poetry 가상환경에서 실행됩니다. 아래 절차는 한 번에 두 서비스를 구동하는 방법을 포함합니다.
 
-# Flutter(Web/Desktop) UI
-cd ui && flutter pub get && flutter run -d chrome
+### 1.1 필수 도구
+
+- Python 3.11 이상과 `pipx` (또는 Poetry가 이미 설치된 환경)
+- Node.js 18 이상과 npm
+
+### 1.2 최초 1회 의존성 설치
+
+```bash
+pipx install poetry        # Poetry 미설치 시
+poetry install             # FastAPI 백엔드 의존성
+cd ui/hbd_designer
+npm install                # 그래프 디자이너 UI 의존성
+```
+
+UI 의존성 설치는 아래 통합 실행 스크립트가 자동으로 수행해 주지만, 최초 실행 전 수동으로 설치해도 됩니다.
+
+### 1.3 단일 터미널에서 백엔드 + UI 실행
+
+```bash
+poetry run python scripts/run_dev.py
+```
+
+위 스크립트는 다음을 수행합니다.
+
+- `poetry` 환경의 Python으로 FastAPI 서버(`uvicorn api.app:app --reload`)를 시작합니다.
+- `ui/hbd_designer` 디렉터리에서 `npm run dev -- --host localhost --port 5173`를 실행합니다.
+- 표준 출력에 `[api:out]`, `[ui:out]` 접두사가 붙은 로그를 스트리밍합니다.
+
+브라우저에서 http://localhost:5173 에 접속해 그래프 디자이너를 확인하고, `Ctrl+C`로 두 프로세스를 동시에 종료할 수 있습니다. `--backend-port`, `--ui-port` 옵션으로 포트를 바꿀 수 있으며, 필요한 경우 `--backend-host`, `--ui-host`도 지정할 수 있습니다.
+
+### 1.4 개별 실행 (선택)
+
+통합 실행이 아닌 별도 터미널에서 실행하려면 다음 명령을 사용할 수 있습니다.
+
+```bash
+# FastAPI 백엔드 (Poetry 환경)
+poetry run uvicorn api.app:app --reload --host 127.0.0.1 --port 8000
+
+# 그래프 디자이너 UI (Vite dev server)
+cd ui/hbd_designer
+npm run dev -- --host localhost --port 5173
 ```
 
 - 실행 결과는 `output/<case>/` 디렉터리에 JSON/Excel/SVG 형태로 저장됩니다.
@@ -22,16 +58,15 @@ cd ui && flutter pub get && flutter run -d chrome
 
 ```
 hbd/
-├─ engine/               # Thermo core (numpy + iapws/CoolProp)
 ├─ api/                  # FastAPI 서비스 엔트리포인트 (/simulate, /optimize, /schemas)
-├─ ui/                   # Flutter(Riverpod) 기반 Canvas UI
 ├─ defaults/             # 기본 가정값 테이블 및 장치별 초기 조건
-├─ schemas/              # /schemas 엔드포인트에서 제공하는 JSON 스키마 모음
-├─ examples/graphs/      # 샘플 PlantGraph JSON 그래프
 ├─ docs/                 # 상세 스키마 및 설계 문서
-└─ ui/
-   ├─ palette/           # unit_palette.json에 정의된 캔버스 장치 팔레트
-   └─ ...                # Flutter 프로젝트 소스
+├─ examples/graphs/      # 샘플 PlantGraph JSON 그래프
+├─ schemas/              # /schemas 엔드포인트에서 제공하는 JSON 스키마 모음
+├─ scripts/              # 개발 편의 스크립트 (run_dev.py 등)
+├─ ui/
+│  ├─ hbd_designer/      # React + Vite 기반 그래프 디자이너 UI
+│  └─ palette/           # unit_palette.json에 정의된 캔버스 장치 팔레트
 └─ AGENTS.md             # 에이전트 I/O 계약 및 계산 절차 (본 README와 내용 동기화)
 ```
 
