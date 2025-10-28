@@ -5,10 +5,20 @@ description = "Graph-based thermal flex engine for HBD agent runtime"
 readme = "README.md"
 authors = ["Trae8899 <maintainers@hbd.energy>"]
 license = "MIT"
-packages = [{ include = "hbd" }]
+packages = [
+    { include = "hbd", from = "src" },
+    { include = "api", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+fastapi = "^0.110"
+uvicorn = "^0.30"
+pydantic = "^2.0"
+numpy = "^1.24"
+scipy = "^1.10"
+iapws = "^1.5"
+coolprop = "^6.4"
 
 [tool.poetry.plugins."hbd.units"]
 SteamTurbineHP = "hbd.units.steam_turbine:SteamTurbineHP"

@@ -1,0 +1,47 @@
+{
+  "$id": "https://hbd.energy/schemas/SteamTurbineIPLP.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SteamTurbineIPLP Parameters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "eta_isentropic": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.88,
+      "description": "Isentropic efficiency applied to the ideal enthalpy drop."
+    },
+    "mech_efficiency": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.985,
+      "description": "Mechanical efficiency capturing bearing and gear losses."
+    },
+    "generator_efficiency": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.985,
+      "description": "Electrical generator efficiency applied to shaft power."
+    },
+    "min_flow_kg_s": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "default": null,
+      "description": "Optional minimum mass flow rate to keep the section online."
+    },
+    "max_flow_kg_s": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "default": null,
+      "description": "Optional maximum mass flow rate allowed through the section."
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Free-form key/value pairs forwarded to the host application."
+    }
+  }
+}

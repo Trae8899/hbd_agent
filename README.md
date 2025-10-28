@@ -7,14 +7,16 @@ HBD Thermal Flex는 복합 화력(CCPP) 및 CHP/Power-to-Heat 구성을 **장치
 ```bash
 # Python 백엔드
 pipx install poetry && poetry install
-poetry run uvicorn api.app:app --reload  # /simulate, /optimize, /schemas
+poetry run uvicorn api.app:app --reload  # /simulate, /optimize, /schemas, /palette/units
 
 # Flutter(Web/Desktop) UI
 cd ui && flutter pub get && flutter run -d chrome
 ```
 
 - 실행 결과는 `output/<case>/` 디렉터리에 JSON/Excel/SVG 형태로 저장됩니다.
-- 샘플 입력은 `cases/` 하위의 PlantGraph + RunCase JSON을 참고하세요.
+- 샘플 PlantGraph는 `examples/graphs/` 하위 JSON을 참고하세요.
+- `examples/graphs/ccpp_base.json`과 `examples/graphs/ccpp_reheat.json`은 각각 비재열/재열 3압력 CCPP 토폴로지를 정의합니다.
+- 샘플 그래프를 복제하여 `RunCase` 정의와 함께 `/simulate` 또는 `/optimize` 엔드포인트에 제출하면 바로 실행할 수 있습니다.
 
 ## 2. 저장소 구조
 
@@ -24,8 +26,12 @@ hbd/
 ├─ api/                  # FastAPI 서비스 엔트리포인트 (/simulate, /optimize, /schemas)
 ├─ ui/                   # Flutter(Riverpod) 기반 Canvas UI
 ├─ defaults/             # 기본 가정값 테이블 및 장치별 초기 조건
-├─ cases/                # 샘플 PlantGraph/RunCase 조합
+├─ schemas/              # /schemas 엔드포인트에서 제공하는 JSON 스키마 모음
+├─ examples/graphs/      # 샘플 PlantGraph JSON 그래프
 ├─ docs/                 # 상세 스키마 및 설계 문서
+└─ ui/
+   ├─ palette/           # unit_palette.json에 정의된 캔버스 장치 팔레트
+   └─ ...                # Flutter 프로젝트 소스
 └─ AGENTS.md             # 에이전트 I/O 계약 및 계산 절차 (본 README와 내용 동기화)
 ```
 
@@ -52,15 +58,49 @@ hbd/
   "meta": {"version": "1.0"},
   "ambient": {"T_C": 30.0, "RH_pct": 60, "P_kPa_abs": 101.3},
   "units": [
-    {"id": "GT1", "type": "GasTurbine", "params": {"iso_power_MW": 401.8, "ISO_heat_rate_kJ_per_kWh": 8470, "fuel_LHV_kJ_per_kg": 49000}},
-    {"id": "HRSG", "type": "HRSG3P", "params": {"pinch_HP_K": 10, "approach_HP_K": 5}},
-    {"id": "STG", "type": "SteamTurbineIPLP", "params": {"eta_is_IP": 0.88, "eta_is_LP": 0.88}},
-    {"id": "COND", "type": "Condenser", "params": {"cw_in_C": 20, "cw_out_max_C": 28, "vacuum_kPa_abs": 8}}
+    {
+      "id": "GT1",
+      "type": "GasTurbine",
+      "params": {
+        "iso_power_MW": 401.8,
+        "ISO_heat_rate_kJ_per_kWh": 8470,
+        "fuel_LHV_kJ_per_kg": 49000
+      }
+    },
+    {
+      "id": "HRSG",
+      "type": "HRSG3P",
+      "params": {
+        "pinch_HP_K": 10,
+        "approach_HP_K": 5,
+        "pinch_IP_K": 12,
+        "pinch_LP_K": 15
+      }
+    },
+    {
+      "id": "STG",
+      "type": "SteamTurbineIPLP",
+      "params": {
+        "eta_isentropic": 0.88,
+        "mech_efficiency": 0.985,
+        "generator_efficiency": 0.985
+      }
+    },
+    {
+      "id": "COND",
+      "type": "Condenser",
+      "params": {
+        "cw_in_C": 20,
+        "cw_out_max_C": 28,
+        "vacuum_kPa_abs": 8
+      }
+    }
   ],
   "streams": [
     {"from": "GT1.exhaust", "to": "HRSG.gas_in"},
     {"from": "HRSG.hp_sh_out", "to": "STG.hp_in"},
-    {"from": "STG.lp_exhaust", "to": "COND.steam_in"}
+    {"from": "STG.lp_exhaust", "to": "COND.steam_in"},
+    {"from": "COND.condensate_out", "to": "HRSG.feedwater_in"}
   ]
 }
 ```
@@ -90,7 +130,11 @@ hbd/
 }
 ```
 
-### 4.2 RunCase 정의
+### 4.2 재열 CCPP 토폴로지 예시
+
+재열 구성의 경우 HP → 재열 → IP → LP 순서로 증기 흐름을 구성하며, HRSG가 재열 증기를 공급합니다. 상세 연결은 [`examples/graphs/ccpp_reheat.json`](examples/graphs/ccpp_reheat.json)에 수록된 그래프를 참고하세요.
+
+### 4.3 RunCase 정의
 
 ```json
 {
@@ -121,7 +165,7 @@ hbd/
 - `pricing` 블록은 전력/열/연료 단가를 제공하며, `max_revenue` 목적에서 사용합니다.
 - 난방 제약은 공급/환수 온도, 열수요(`heat_demand_MW`) 등의 경계 조건을 포함합니다.
 
-### 4.3 결과 객체(Result)
+### 4.4 결과 객체(Result)
 
 ```json
 {
