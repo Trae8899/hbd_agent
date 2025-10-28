@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HBD Thermal Flex 테스트 패널</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Pretendard", "Segoe UI", sans-serif;
+        background: var(--page-bg, #101418);
+        color: var(--page-fg, #e8ecf1);
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+        grid-template-rows: auto auto 1fr;
+        gap: 16px;
+        background: #0b1116;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 8px;
+      }
+
+      header {
+        grid-column: 1 / 3;
+        background: rgba(15, 26, 36, 0.7);
+        border: 1px solid rgba(86, 184, 255, 0.3);
+        border-radius: 12px;
+        padding: 16px 20px;
+      }
+
+      header p {
+        margin: 8px 0 0;
+        line-height: 1.5;
+      }
+
+      section {
+        background: rgba(12, 21, 30, 0.82);
+        border-radius: 12px;
+        border: 1px solid rgba(50, 110, 160, 0.25);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        min-height: 240px;
+      }
+
+      .actions {
+        grid-column: 1 / 3;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .actions button {
+        appearance: none;
+        border-radius: 999px;
+        border: none;
+        padding: 10px 18px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, #35b4ff, #0572e0);
+        color: white;
+        transition: transform 0.15s ease;
+      }
+
+      .actions button.secondary {
+        background: transparent;
+        border: 1px solid rgba(86, 184, 255, 0.45);
+      }
+
+      .actions button:hover {
+        transform: translateY(-1px);
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.9rem;
+        gap: 8px;
+        flex: 1;
+      }
+
+      textarea {
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        min-height: 220px;
+        border-radius: 8px;
+        border: 1px solid rgba(86, 184, 255, 0.35);
+        background: rgba(3, 8, 12, 0.92);
+        color: #e2ecff;
+        padding: 12px;
+        resize: vertical;
+        line-height: 1.4;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #35b4ff;
+        box-shadow: 0 0 0 1px rgba(53, 180, 255, 0.45);
+      }
+
+      select,
+      input[type="text"] {
+        background: rgba(3, 8, 12, 0.92);
+        color: #e2ecff;
+        border-radius: 8px;
+        border: 1px solid rgba(86, 184, 255, 0.35);
+        padding: 8px 10px;
+        font-size: 0.95rem;
+      }
+
+      .flex-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      pre {
+        background: rgba(3, 8, 12, 0.92);
+        border-radius: 8px;
+        border: 1px solid rgba(86, 184, 255, 0.35);
+        padding: 12px;
+        font-size: 0.9rem;
+        overflow: auto;
+        max-height: 360px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .status-bar {
+        margin-top: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+
+      .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(53, 180, 255, 0.2);
+        border: 1px solid rgba(53, 180, 255, 0.4);
+        font-weight: 600;
+      }
+
+      .muted {
+        color: rgba(201, 216, 232, 0.7);
+      }
+
+      footer {
+        grid-column: 1 / 3;
+        text-align: center;
+        font-size: 0.85rem;
+        color: rgba(201, 216, 232, 0.6);
+      }
+
+      @media (max-width: 980px) {
+        body {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto;
+        }
+
+        header,
+        .actions,
+        footer {
+          grid-column: 1 / 2;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>HBD Thermal Flex 그래픽 테스트 패널</h1>
+      <p>
+        FastAPI 백엔드(`/schemas`, `/simulate`, `/optimize`)와 직접 연동되는 브라우저
+        기반 실험 도구입니다. 샘플 그래프를 불러와 파라미터를 조정한 뒤 시뮬레이션
+        또는 최적화를 실행해 보세요. 모든 요청은 순수 JSON API를 사용하므로 동일한
+        입력을 CLI나 다른 클라이언트에서도 재사용할 수 있습니다.
+      </p>
+    </header>
+
+    <section id="schema-panel">
+      <h2>1. 스키마 탐색</h2>
+      <p class="muted">
+        `/schemas` 엔드포인트에서 제공하는 장치 파라미터 스키마 목록입니다. 각 항목을
+        선택하면 세부 속성을 확인할 수 있습니다.
+      </p>
+      <div class="flex-row">
+        <label>
+          스키마 선택
+          <select id="schema-select"></select>
+        </label>
+        <label>
+          검색
+          <input type="text" id="schema-filter" placeholder="필터 (예: HRSG)" />
+        </label>
+      </div>
+      <pre id="schema-detail">스키마를 불러오는 중...</pre>
+    </section>
+
+    <section id="graph-panel">
+      <h2>2. PlantGraph JSON</h2>
+      <p class="muted">
+        엔진에 제출할 장치-스트림 그래프입니다. 좌측 드롭다운에서 샘플을 선택하거나
+        직접 JSON을 수정해 보세요.
+      </p>
+      <label>
+        샘플 그래프
+        <select id="graph-select"></select>
+      </label>
+      <textarea id="graph-editor" spellcheck="false"></textarea>
+    </section>
+
+    <section id="run-case-panel">
+      <h2>3. RunCase 정의</h2>
+      <p class="muted">
+        운전 모드, 목적 함수, 경계/제약 조건 등을 설정합니다. 기본값은 CCPP 예제를
+        기준으로 구성되어 있습니다.
+      </p>
+      <textarea id="run-case-editor" spellcheck="false"></textarea>
+      <div class="status-bar">
+        <span class="badge" id="run-mode">mode: simulate</span>
+        <span class="muted" id="objective-label"></span>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button id="simulate-btn">시뮬레이션 실행</button>
+      <button id="optimize-btn" class="secondary">최적화 실행</button>
+      <span class="muted" id="status-text">준비 완료</span>
+    </section>
+
+    <section id="result-panel" style="grid-column: 1 / 3">
+      <h2>4. 결과</h2>
+      <pre id="result-output">API 호출 결과가 여기에 표시됩니다.</pre>
+    </section>
+
+    <footer>© 2024 HBD Thermal Flex – 브라우저에서 바로 엔진을 검증하세요.</footer>
+
+    <script>
+      const schemaSelect = document.getElementById("schema-select");
+      const schemaDetail = document.getElementById("schema-detail");
+      const schemaFilter = document.getElementById("schema-filter");
+      const graphSelect = document.getElementById("graph-select");
+      const graphEditor = document.getElementById("graph-editor");
+      const runCaseEditor = document.getElementById("run-case-editor");
+      const runModeBadge = document.getElementById("run-mode");
+      const objectiveLabel = document.getElementById("objective-label");
+      const simulateBtn = document.getElementById("simulate-btn");
+      const optimizeBtn = document.getElementById("optimize-btn");
+      const statusText = document.getElementById("status-text");
+      const resultOutput = document.getElementById("result-output");
+
+      async function fetchJSON(url) {
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`요청 실패: ${res.status} ${res.statusText}`);
+        }
+        return res.json();
+      }
+
+      function pretty(obj) {
+        return JSON.stringify(obj, null, 2);
+      }
+
+      function updateRunCaseMeta() {
+        try {
+          const runCase = JSON.parse(runCaseEditor.value);
+          runModeBadge.textContent = `mode: ${runCase.mode ?? "simulate"}`;
+          objectiveLabel.textContent = runCase.objective
+            ? `objective: ${runCase.objective}`
+            : "";
+        } catch (err) {
+          runModeBadge.textContent = "mode: (JSON 오류)";
+          objectiveLabel.textContent = "";
+        }
+      }
+
+      schemaFilter.addEventListener("input", () => {
+        const term = schemaFilter.value.toLowerCase();
+        for (const option of schemaSelect.options) {
+          option.hidden = term ? !option.value.toLowerCase().includes(term) : false;
+        }
+        if (schemaSelect.selectedIndex === -1 || schemaSelect.selectedOptions[0]?.hidden) {
+          schemaSelect.selectedIndex = 0;
+          schemaSelect.dispatchEvent(new Event("change"));
+        }
+      });
+
+      schemaSelect.addEventListener("change", async () => {
+        const key = schemaSelect.value;
+        if (!key) {
+          schemaDetail.textContent = "스키마를 선택하세요.";
+          return;
+        }
+        try {
+          const schema = await fetchJSON(`/schemas/${encodeURIComponent(key)}`);
+          schemaDetail.textContent = pretty(schema);
+        } catch (err) {
+          schemaDetail.textContent = err.message;
+        }
+      });
+
+      async function loadSchemas() {
+        try {
+          const schemas = await fetchJSON("/schemas");
+          const keys = Object.keys(schemas).sort();
+          schemaSelect.innerHTML = "";
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = `${keys.length}개 스키마`; // do not translate
+          schemaSelect.appendChild(placeholder);
+          keys.forEach((key) => {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = key;
+            schemaSelect.appendChild(option);
+          });
+          schemaDetail.textContent = "스키마를 선택하세요.";
+        } catch (err) {
+          schemaDetail.textContent = `스키마 로드 실패: ${err.message}`;
+        }
+      }
+
+      graphSelect.addEventListener("change", async () => {
+        const key = graphSelect.value;
+        if (!key) {
+          return;
+        }
+        try {
+          const graph = await fetchJSON(`/examples/graphs/${encodeURIComponent(key)}`);
+          graphEditor.value = pretty(graph);
+        } catch (err) {
+          graphEditor.value = `그래프 로드 실패: ${err.message}`;
+        }
+      });
+
+      async function loadGraphs() {
+        try {
+          const list = await fetchJSON("/examples/graphs");
+          graphSelect.innerHTML = "";
+          list.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.id} (${item.description})`;
+            graphSelect.appendChild(option);
+          });
+          if (list.length > 0) {
+            graphSelect.value = list[0].id;
+            graphSelect.dispatchEvent(new Event("change"));
+          }
+        } catch (err) {
+          graphEditor.value = `그래프 목록 로드 실패: ${err.message}`;
+        }
+      }
+
+      async function loadRunCase() {
+        try {
+          const runCase = await fetchJSON("/examples/run_case");
+          runCaseEditor.value = pretty(runCase);
+          updateRunCaseMeta();
+        } catch (err) {
+          runCaseEditor.value = `RunCase 로드 실패: ${err.message}`;
+        }
+      }
+
+      runCaseEditor.addEventListener("input", updateRunCaseMeta);
+
+      async function sendRequest(mode) {
+        try {
+          const plantGraph = JSON.parse(graphEditor.value);
+          const runCase = JSON.parse(runCaseEditor.value);
+          runCase.mode = mode;
+          statusText.textContent = `${mode} 요청 전송 중...`;
+          const endpoint = mode === "optimize" ? "/optimize" : "/simulate";
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plant_graph: plantGraph, run_case: runCase }),
+          });
+          const payload = await res.json();
+          if (!res.ok) {
+            throw new Error(payload.detail ?? res.statusText);
+          }
+          resultOutput.textContent = pretty(payload);
+          statusText.textContent = `${mode} 완료 (${new Date().toLocaleTimeString()})`;
+        } catch (err) {
+          resultOutput.textContent = err.message;
+          statusText.textContent = `${mode} 실패`;
+        }
+      }
+
+      simulateBtn.addEventListener("click", () => sendRequest("simulate"));
+      optimizeBtn.addEventListener("click", () => sendRequest("optimize"));
+
+      loadSchemas();
+      loadGraphs();
+      loadRunCase();
+    </script>
+  </body>
+</html>
