@@ -9,12 +9,13 @@ HBD Thermal Flex는 복합 화력(CCPP) 및 CHP/Power-to-Heat 구성을 **장치
 pipx install poetry && poetry install
 poetry run uvicorn api.app:app --reload  # /simulate, /optimize, /schemas, /palette/units
 
-# Flutter(Web/Desktop) UI
-cd ui && flutter pub get && flutter run -d chrome
+# Web UI (Vite + React)
+cd ui/web && npm install && npm run dev
 ```
 
 - 실행 결과는 `output/<case>/` 디렉터리에 JSON/Excel/SVG 형태로 저장됩니다.
 - 샘플 PlantGraph는 `examples/graphs/` 하위 JSON을 참고하세요.
+- 샘플 RunCase 정의는 `examples/run_case/` 디렉터리의 JSON을 참조하세요.
 - `examples/graphs/ccpp_base.json`과 `examples/graphs/ccpp_reheat.json`은 각각 비재열/재열 3압력 CCPP 토폴로지를 정의합니다.
 - 샘플 그래프를 복제하여 `RunCase` 정의와 함께 `/simulate` 또는 `/optimize` 엔드포인트에 제출하면 바로 실행할 수 있습니다.
 
@@ -24,14 +25,15 @@ cd ui && flutter pub get && flutter run -d chrome
 hbd/
 ├─ engine/               # Thermo core (numpy + iapws/CoolProp)
 ├─ api/                  # FastAPI 서비스 엔트리포인트 (/simulate, /optimize, /schemas)
-├─ ui/                   # Flutter(Riverpod) 기반 Canvas UI
+├─ ui/                   # Front-end assets and web canvas UI
 ├─ defaults/             # 기본 가정값 테이블 및 장치별 초기 조건
 ├─ schemas/              # /schemas 엔드포인트에서 제공하는 JSON 스키마 모음
 ├─ examples/graphs/      # 샘플 PlantGraph JSON 그래프
+├─ examples/run_case/    # 샘플 RunCase 정의
 ├─ docs/                 # 상세 스키마 및 설계 문서
 └─ ui/
    ├─ palette/           # unit_palette.json에 정의된 캔버스 장치 팔레트
-   └─ ...                # Flutter 프로젝트 소스
+   └─ web/               # React + Vite 기반 그래프 편집기
 └─ AGENTS.md             # 에이전트 I/O 계약 및 계산 절차 (본 README와 내용 동기화)
 ```
 
