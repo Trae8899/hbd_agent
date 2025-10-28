@@ -70,7 +70,8 @@
 
 - `units[*].type`은 플러그인 레지스트리 키이며, 동일 인터페이스를 구현하면 새 장치를 자유롭게 추가할 수 있습니다.
 - 포트 `medium`은 `gas | steam | water | hot_water | fuel_gas` 중 하나로 지정하여 물성 모듈을 선택합니다.
-- `streams`는 Directed Edge로 표현되며, 엔진은 토폴로지 정렬 후 재순환 루프만 수치 반복으로 해결합니다.
+- `streams`는 Directed Edge로 표현되며, 엔진은 토폴로지 정렬 후 재순환 루프만 수치 반복으로 해결합니다. FastAPI
+  `/examples/graphs` 엔드포인트와 HTML 테스트 패널이 동일한 샘플을 제공합니다.
 
 #### CHP / 난방 확장 예시 조각
 
@@ -124,6 +125,7 @@
 
 - `objective`는 CHP 수익 최적화를 위해 `max_revenue` 옵션을 지원하며 `pricing` 블록을 필요로 합니다.
 - 난방 제약은 공급/환수 온도, 열수요, 축열 SOC 범위를 포함합니다.
+- FastAPI `/examples/run_case` 엔드포인트는 HTML 패널과 동일한 기본 RunCase 템플릿을 제공합니다.
 
 ### 2.3 결과(Result)
 
@@ -204,6 +206,7 @@ class UnitBase(Protocol):
 - 결과에는 `plant_hash`(입력 그래프 SHA-1)와 `solver_commit`을 기록하여 재현성을 확보합니다.
 - 산출물: Excel(요약/스트림/로그), SVG(블록 다이어그램), JSON(전체 state).
 - UI는 `/schemas` 엔드포인트를 활용해 폼을 자동 구성하며, KPI 카드에 `Heat MWth`, `DHN SOC`, `Supply/Return °C`, `Revenue/h`를 표시합니다.
+- FastAPI 루트(`/`)는 저장소에 포함된 HTML 그래픽 테스트 패널을 제공하며 `/schemas`, `/examples/*`, `/simulate`, `/optimize` 호출을 손쉽게 재현할 수 있습니다.
 - 증기 터빈 등 장치 팔레트 메타데이터는 `ui/palette/unit_palette.json`에서 관리하며, 백엔드는 `/palette/units`로 이를 제공해야 합니다.
 - Canvas UI는 매질별 색상(가스=빨강, 증기/물=파랑, 난방수=주황, 연료가스=진회색)을 사용하고 Auto-Run으로 0.5초 후 재계산합니다.
 

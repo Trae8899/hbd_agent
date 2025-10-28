@@ -9,14 +9,19 @@ HBD Thermal Flex는 복합 화력(CCPP) 및 CHP/Power-to-Heat 구성을 **장치
 pipx install poetry && poetry install
 poetry run uvicorn api.app:app --reload  # /simulate, /optimize, /schemas, /palette/units
 
+# 그래픽 테스트 패널 (HTML)
+# FastAPI 실행 후 http://127.0.0.1:8000/ 에 접속하면 브라우저에서 바로 테스트할 수 있습니다.
+
 # Flutter(Web/Desktop) UI
 cd ui && flutter pub get && flutter run -d chrome
 ```
 
+- FastAPI 루트(`/`)는 저장소에 포함된 HTML 테스트 패널을 제공하여 `/schemas`, `/examples/*`,
+  `/simulate`, `/optimize` 호출을 브라우저에서 바로 실험할 수 있습니다.
 - 실행 결과는 `output/<case>/` 디렉터리에 JSON/Excel/SVG 형태로 저장됩니다.
 - 샘플 PlantGraph는 `examples/graphs/` 하위 JSON을 참고하세요.
 - `examples/graphs/ccpp_base.json`과 `examples/graphs/ccpp_reheat.json`은 각각 비재열/재열 3압력 CCPP 토폴로지를 정의합니다.
-- 샘플 그래프를 복제하여 `RunCase` 정의와 함께 `/simulate` 또는 `/optimize` 엔드포인트에 제출하면 바로 실행할 수 있습니다.
+- 샘플 그래프를 복제하여 `RunCase` 정의와 함께 `/simulate` 또는 `/optimize` 엔드포인트에 제출하면 바로 실행할 수 있습니다. HTML 패널은 `/examples/run_case`에서 기본 RunCase 템플릿을 제공합니다.
 
 ## 2. 저장소 구조
 
@@ -107,7 +112,8 @@ hbd/
 
 - `units[*].type`은 플러그인 레지스트리 키이며, 동일 인터페이스를 구현하면 새 장치를 자유롭게 추가할 수 있습니다.
 - 포트 매질은 `gas`, `steam`, `water` 외에 **`hot_water`, `fuel_gas`**를 지원하여 CHP/난방 루프를 표현합니다.
-- `streams`는 Directed Edge로 표현되며, 엔진은 토폴로지 정렬 후 재순환 루프만 수치 반복으로 해결합니다.
+- `streams`는 Directed Edge로 표현되며, 엔진은 토폴로지 정렬 후 재순환 루프만 수치 반복으로 해결합니다. FastAPI
+  `/examples/graphs` 엔드포인트와 HTML 패널이 동일한 샘플을 불러옵니다.
 
 #### CHP / 난방 확장 예시 조각
 
