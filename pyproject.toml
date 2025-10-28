@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "hbd-agent"
+version = "0.1.0"
+description = "Graph-based thermal flex engine for HBD agent runtime"
+readme = "README.md"
+authors = ["Trae8899 <maintainers@hbd.energy>"]
+license = "MIT"
+packages = [{ include = "hbd" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.plugins."hbd.units"]
+SteamTurbineHP = "hbd.units.steam_turbine:SteamTurbineHP"
+SteamTurbineIP = "hbd.units.steam_turbine:SteamTurbineIP"
+SteamTurbineLP = "hbd.units.steam_turbine:SteamTurbineLP"
+SteamTurbineIPLP = "hbd.units.steam_turbine:SteamTurbineIPLP"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
